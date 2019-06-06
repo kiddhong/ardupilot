@@ -75,6 +75,11 @@
 #define AP_SERIALMANAGER_SBUS1_BUFSIZE_RX     16
 #define AP_SERIALMANAGER_SBUS1_BUFSIZE_TX     32
 
+//Jetson TX2; added by Jehong 2019-06-06
+#define AP_JETSON_TX2_BAUD       115200
+#define AP_JETSON_TX2_BUFSIZE_RX 128
+#define AP_JETSON_TX2_BUFSIZE_TX 512
+
 class AP_SerialManager {
 public:
     AP_SerialManager();
@@ -107,6 +112,7 @@ public:
         SerialProtocol_Robotis = 19,
         SerialProtocol_NMEAOutput = 20,
         SerialProtocol_WindVane = 21,
+        SerialProtocol_Jetson_TX2 = 22, //added by Jehong 2019-06-06
     };
 
     // get singleton instance

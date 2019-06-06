@@ -82,14 +82,14 @@ const AP_Param::GroupInfo AP_SerialManager::var_info[] = {
     // @Values: -1:None, 1:MAVLink1, 2:MAVLink2, 3:Frsky D, 4:Frsky SPort, 5:GPS, 7:Alexmos Gimbal Serial, 8:SToRM32 Gimbal Serial, 9:Rangefinder, 10:FrSky SPort Passthrough (OpenTX), 11:Lidar360, 13:Beacon, 14:Volz servo out, 15:SBus servo out, 16:ESC Telemetry, 17:Devo Telemetry, 18:OpticalFlow, 19:RobotisServo, 20:NMEA Output, 21:WindVane
     // @User: Standard
     // @RebootRequired: True
-    AP_GROUPINFO("2_PROTOCOL",  3, AP_SerialManager, state[2].protocol, SERIAL2_PROTOCOL_DEFAULT),
+    AP_GROUPINFO("2_PROTOCOL",  3, AP_SerialManager, state[2].protocol, SerialProtocol_Jetson_TX2),
 
     // @Param: 2_BAUD
     // @DisplayName: Telemetry 2 Baud Rate
     // @Description: The baud rate of the Telem2 port. Most stm32-based boards can support rates of up to 1500. If you setup a rate you cannot support and then can't connect to your board you should load a firmware from a different vehicle type. That will reset all your parameters to defaults.
     // @Values: 1:1200,2:2400,4:4800,9:9600,19:19200,38:38400,57:57600,111:111100,115:115200,256:256000,500:500000,921:921600,1500:1500000
     // @User: Standard
-    AP_GROUPINFO("2_BAUD", 4, AP_SerialManager, state[2].baud, AP_SERIALMANAGER_MAVLINK_BAUD/1000),
+    AP_GROUPINFO("2_BAUD", 4, AP_SerialManager, state[2].baud, AP_JETSON_TX2_BAUD/1000),
 
     // @Param: 3_PROTOCOL
     // @DisplayName: Serial 3 (GPS) protocol selection
@@ -112,14 +112,14 @@ const AP_Param::GroupInfo AP_SerialManager::var_info[] = {
     // @Values: -1:None, 1:MAVLink1, 2:MAVLink2, 3:Frsky D, 4:Frsky SPort, 5:GPS, 7:Alexmos Gimbal Serial, 8:SToRM32 Gimbal Serial, 9:Rangefinder, 10:FrSky SPort Passthrough (OpenTX), 11:Lidar360, 13:Beacon, 14:Volz servo out, 15:SBus servo out, 16:ESC Telemetry, 17:Devo Telemetry, 18:OpticalFlow, 19:RobotisServo, 20:NMEA Output, 21:WindVane
     // @User: Standard
     // @RebootRequired: True
-    AP_GROUPINFO("4_PROTOCOL",  7, AP_SerialManager, state[4].protocol, SerialProtocol_GPS),
+    AP_GROUPINFO("4_PROTOCOL",  7, AP_SerialManager, state[4].protocol, SerialProtocol_Console),
 
     // @Param: 4_BAUD
     // @DisplayName: Serial 4 Baud Rate
     // @Description: The baud rate used for Serial4. Most stm32-based boards can support rates of up to 1500. If you setup a rate you cannot support and then can't connect to your board you should load a firmware from a different vehicle type. That will reset all your parameters to defaults.
     // @Values: 1:1200,2:2400,4:4800,9:9600,19:19200,38:38400,57:57600,111:111100,115:115200,256:256000,500:500000,921:921600,1500:1500000
     // @User: Standard
-    AP_GROUPINFO("4_BAUD", 8, AP_SerialManager, state[4].baud, AP_SERIALMANAGER_GPS_BAUD/1000),
+    AP_GROUPINFO("4_BAUD", 8, AP_SerialManager, state[4].baud, SerialProtocol_Console/1000),
 
     // @Param: 5_PROTOCOL
     // @DisplayName: Serial5 protocol selection
@@ -354,6 +354,14 @@ void AP_SerialManager::init()
                                          AP_SERIALMANAGER_ROBOTIS_BUFSIZE_TX);
                     state[i].uart->set_unbuffered_writes(true);
                     state[i].uart->set_flow_control(AP_HAL::UARTDriver::FLOW_CONTROL_DISABLE);
+                    break;
+
+                case SerialProtocol_Jetson_TX2:
+                // Note baudrate is hardcoded to 57600
+                state[i].baud = AP_JETSON_TX2_BAUD / 1000;   // update baud param in case user looks at it
+                state[i].uart->begin(map_baudrate(state[i].baud),
+                                     AP_JETSON_TX2_BUFSIZE_RX,
+                                     AP_JETSON_TX2_BUFSIZE_TX);
                     break;
 
                 default:

@@ -457,6 +457,9 @@ void Copter::one_hz_loop()
 
     // init compass location for declination
     init_compass_location();
+
+    // hal.uartE->printf("GPS2 console test.\n");
+    hal.uartD->printf("TEL2 console test.\n");
 }
 
 // called at 50hz
