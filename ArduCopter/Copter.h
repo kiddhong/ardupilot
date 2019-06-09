@@ -24,6 +24,8 @@
 #include <cmath>
 #include <stdio.h>
 #include <stdarg.h>
+#include <string.h>
+#include <stdlib.h>
 
 #include <AP_HAL/AP_HAL.h>
 
@@ -845,6 +847,11 @@ private:
 
 #if OSD_ENABLED == ENABLED
     void publish_osd_info();
+#endif
+
+#if GIST_BIRD_EYE_VIEW_SYSTEM == ENABLED
+    void camera_pose();
+    char calcChecksum(char *data, int leng);
 #endif
 
 #include "mode.h"

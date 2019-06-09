@@ -357,11 +357,11 @@ void AP_SerialManager::init()
                     break;
 
                 case SerialProtocol_Jetson_TX2:
-                // Note baudrate is hardcoded to 57600
                 state[i].baud = AP_JETSON_TX2_BAUD / 1000;   // update baud param in case user looks at it
                 state[i].uart->begin(map_baudrate(state[i].baud),
                                      AP_JETSON_TX2_BUFSIZE_RX,
                                      AP_JETSON_TX2_BUFSIZE_TX);
+                // state[i].uart->set_stop_bits(2);
                     break;
 
                 default:

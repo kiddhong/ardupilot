@@ -74,6 +74,8 @@
  */
 
 #include "Copter.h"
+#include "stdio.h"
+#include "string.h"
 
 #define FORCE_VERSION_H_INCLUDE
 #include "version.h"
@@ -199,6 +201,9 @@ const AP_Scheduler::Task Copter::scheduler_tasks[] = {
 #endif
 #if OSD_ENABLED == ENABLED
     SCHED_TASK(publish_osd_info, 1, 10),
+#endif
+#if GIST_BIRD_EYE_VIEW_SYSTEM == ENABLED
+    SCHED_TASK(camera_pose, 20, 100),
 #endif
 };
 
@@ -458,8 +463,7 @@ void Copter::one_hz_loop()
     // init compass location for declination
     init_compass_location();
 
-    // hal.uartE->printf("GPS2 console test.\n");
-    hal.uartD->printf("TEL2 console test.\n");
+    // hal.uartD->printf("TEL2 console test.\n");
 }
 
 // called at 50hz
@@ -592,6 +596,38 @@ void Copter::publish_osd_info()
     osd.set_nav_info(nav_info);
 }
 #endif
+
+#if GIST_BIRD_EYE_VIEW_SYSTEM == ENABLED
+void Copter::camera_pose()
+{   
+    int packet_size;
+    int buffer_size = 256;
+    char buffer[buffer_size];
+
+    packet_size = snprintf(buffer, buffer_size, "$%.3f,%.3f,%.3f#", ahrs.roll, ahrs.pitch, ahrs.yaw);
+    char checksum = calcChecksum(buffer, packet_size);
+    packet_size += snprintf(buffer+packet_size, buffer_size-packet_size, "%c>", checksum);
+    hal.uartD->printf("%s", buffer);
+    // hal.uartD->printf("$%4.2f,%4.2f,%4.2f#",
+    //             (double)ToDeg(ahrs.roll),
+    //             (double)ToDeg(ahrs.pitch),
+    //             (double)ToDeg(ahrs.yaw)
+    //             );
+}
+
+char Copter::calcChecksum(char *data, int leng)
+{
+   char csum;
+
+    csum = 0;
+    for (;leng > 0;leng--)
+        csum += *data++;
+
+    return 0xFF - csum;
+}
+#endif
+
+
 
 /*
   constructor for main Copter class
