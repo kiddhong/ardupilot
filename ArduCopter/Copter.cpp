@@ -603,16 +603,33 @@ void Copter::camera_pose()
     int packet_size;
     int buffer_size = 256;
     char buffer[buffer_size];
+    Vector2f posNE;
+    float posD;
+    
+    Location origin;
+    // Location loc;
+    // ahrs.get_position(loc);
+    // ahrs.set_origin(origin);
 
-    packet_size = snprintf(buffer, buffer_size, "$%.3f,%.3f,%.3f#", ahrs.roll, ahrs.pitch, ahrs.yaw);
+    ahrs.get_origin(origin);
+    ahrs.get_NavEKF2().getPosNE(0,posNE);
+    ahrs.get_NavEKF2().getPosD(0,posD);
+    
+    packet_size = snprintf(buffer, buffer_size, "$%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%d,%d,%d#",
+        ahrs.roll, ahrs.pitch, ahrs.yaw, (float)(posNE.x), (float)(posNE.y), posD,
+        origin.lat, origin.lng, origin.alt);
     char checksum = calcChecksum(buffer, packet_size);
     packet_size += snprintf(buffer+packet_size, buffer_size-packet_size, "%c>", checksum);
     hal.uartD->printf("%s", buffer);
-    // hal.uartD->printf("$%4.2f,%4.2f,%4.2f#",
-    //             (double)ToDeg(ahrs.roll),
-    //             (double)ToDeg(ahrs.pitch),
-    //             (double)ToDeg(ahrs.yaw)
-    //             );
+    // hal.uartD->printf("cur: %d,%d,%d, ori: %d,%d,%d\n",
+    //              loc.lat,
+    //              loc.lng,
+    //              loc.alt,
+    //              origin.lat,
+    //              origin.lng,
+    //              origin.alt
+    //              );
+    // hal.uartD->printf("NED: %.3f,%.3f,%.3f\n",(float)(posNE.x),(float)(posNE.y), posD);
 }
 
 char Copter::calcChecksum(char *data, int leng)

@@ -13,20 +13,25 @@ const AP_HAL::HAL& hal = AP_HAL::get_HAL();
 static AP_SerialManager serial_manager;
 static RangeFinder sonar{serial_manager};
 
+static bool state;
+
 void setup()
 {
     // print welcome message
     hal.console->printf("Range Finder library test\n");
 
     // setup for analog pin 13
-    AP_Param::set_object_value(&sonar, sonar.var_info, "_TYPE", RangeFinder::RangeFinder_TYPE_PLI2C);
+    AP_Param::set_object_value(&sonar, sonar.var_info, "_TYPE", RangeFinder::RangeFinder_TYPE_PX4_PWM);
     AP_Param::set_object_value(&sonar, sonar.var_info, "_PIN", -1.0f);
+    AP_Param::set_object_value(&sonar, sonar.var_info, "_STOP_PIN", 55);
     AP_Param::set_object_value(&sonar, sonar.var_info, "_SCALING", 1.0f);
+    AP_Param::set_object_value(&sonar, sonar.var_info, "_MAX_CM", 4000);
 
     // initialise sensor, delaying to make debug easier
     hal.scheduler->delay(2000);
     sonar.init(ROTATION_PITCH_270);
-    hal.console->printf("RangeFinder: %d devices detected\n", sonar.num_sensors());
+    state = sonar.has_orientation(ROTATION_PITCH_270);
+    hal.console->printf("RangeFinder: %d devices detected\nstate: %d\n", sonar.num_sensors(), state);
 }
 
 void loop()
