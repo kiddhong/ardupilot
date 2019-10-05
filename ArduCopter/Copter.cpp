@@ -605,19 +605,18 @@ void Copter::camera_pose()
     char buffer[buffer_size];
     Vector2f posNE;
     float posD;
+    Vector3f velNED;
     
     Location origin;
-    // Location loc;
-    // ahrs.get_position(loc);
-    // ahrs.set_origin(origin);
 
     ahrs.get_origin(origin);
     ahrs.get_NavEKF2().getPosNE(0,posNE);
     ahrs.get_NavEKF2().getPosD(0,posD);
+    ahrs.get_NavEKF2().getVelNED(0,velNED);
     
-    packet_size = snprintf(buffer, buffer_size, "$%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%d,%d,%d#",
+    packet_size = snprintf(buffer, buffer_size, "$%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%d,%d,%d,%.3f,%.3f,%.3f#",
         ahrs.roll, ahrs.pitch, ahrs.yaw, (float)(posNE.x), (float)(posNE.y), posD,
-        origin.lat, origin.lng, origin.alt);
+        origin.lat, origin.lng, origin.alt, (float)(velNED.x), (float)(velNED.y), (float)(velNED.z));
     char checksum = calcChecksum(buffer, packet_size);
     packet_size += snprintf(buffer+packet_size, buffer_size-packet_size, "%c>", checksum);
     hal.uartD->printf("%s", buffer);
